@@ -74,8 +74,56 @@ _^_ a (suc n) = a * a ^ n
     ≡⟨ sym (∑-assoc g i n) ⟩ ∑ g i (suc n)
   ∎
 
--- ∑-par-shift : (f g : N → N) → (i → N) → (n : N) → 
+∑-par-shift : (f g : N → N) → (i n : N) → ∑ (f ⊕ g) i (suc n) ≡ f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n)
+∑-par-shift f g i 0 = 
+  begin
+    ∑ (f ⊕ g) i (suc 0)
+    ≡⟨⟩ (f ⊕ g) i + ∑ (f ⊕ g) (suc i) 0
+    ≡⟨⟩ (f ⊕ g) i + 0
+    ≡⟨⟩ f i + g i + 0
+    ≡⟨ sym (add-assoc (f i) (g i) 0) ⟩ f i + (g i + 0)
+    ≡⟨ cong (λ x → f i + x) (add-comm (g i) 0) ⟩ f i + (0 + g i)
+    ≡⟨ add-assoc (f i) 0 (g i) ⟩ f i + 0 + g i
+    ≡⟨⟩ f i + ∑ (λ x → g x + f (suc x)) i 0 + g i
+    ≡⟨ cong (λ x → f i + ∑ (λ x → g x + f (suc x)) i 0 + g x) (sym (plus-zero i)) ⟩ f i + ∑ (λ x → g x + f (suc x)) i 0 + g (i + 0)
+  ∎
+∑-par-shift f g i (suc n) =
+  begin
+    ∑ (f ⊕ g) i (suc (suc n))
+    ≡⟨ ∑-assoc (f ⊕ g) i (suc n) ⟩ ∑ (f ⊕ g) i (suc n) + (f ⊕ g) (i + suc n)
+    ≡⟨⟩ ∑ (f ⊕ g) i (suc n) + (f (i + suc n) + g (i + suc n))
+    ≡⟨ add-assoc (∑ (f ⊕ g) i (suc n)) (f (i + suc n)) (g (i + suc n)) ⟩
+      ∑ (f ⊕ g) i (suc n) + f (i + suc n) + g (i + suc n)
+    ≡⟨ cong (λ x → ∑ (f ⊕ g) i (suc n) + f x + g (i + suc n)) (plus-suc i n) ⟩
+      ∑ (f ⊕ g) i (suc n) + f (suc (i + n)) + g (i + suc n)
+    ≡⟨ cong (λ x → x + f (suc (i + n)) + g (i + suc n)) (∑-par-shift f g i n) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f (suc (i + n)) + g (i + suc n)
+    ≡⟨ cong (λ x → x + g (i + suc n)) (sym (add-assoc (f i + ∑ (λ x → g x + f (suc x)) i n) (g (i + n)) (f (suc (i + n))))) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + (g (i + n) + f (suc (i + n))) + g (i + suc n)
+    ≡⟨⟩ f i + ∑ (λ x → g x + f (suc x)) i n + (λ x → g x + f (suc x)) (i + n) + g (i + suc n)
+    ≡⟨ cong (λ x → x + g (i + suc n)) (sym (add-assoc (f i) (∑ (λ x → g x + f (suc x)) i n) ((λ x → g x + f (suc x)) (i + n)))) ⟩
+      f i + (∑ (λ x → g x + f (suc x)) i n + (λ x → g x + f (suc x)) (i + n)) + g (i + suc n)
+    ≡⟨ cong (λ x → f i + x + g (i + suc n)) (sym (∑-assoc (λ x → g x + f (suc x)) i n)) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i (suc n) + g (i + suc n)
+  ∎
 
+∑-C : (n : N) → ∑ (C n) 0 (suc n) ≡ 2 ^ n
+∑-C 0 = refl
+∑-C (suc n) =
+  begin
+    ∑ (C (suc n)) 0 (suc (suc n))
+    ≡⟨⟩ C (suc n) 0 + ∑ (C (suc n)) 1 (suc n)
+    ≡⟨ cong (λ x → C (suc n) 0 + x) (∑-ind-shift (C (suc n)) (f ⊕ g) eq 0 (suc n)) ⟩ C (suc n) 0 + ∑ (f ⊕ g) 0 (suc n)
+    ≡⟨ ? ⟩ 2 ^ suc n
+  ∎
+  where
+    f g : N → N
+    f = λ x → C n x
+    g = λ x → C n (suc x)
+    eq : (j : N) → (C (suc n)) (suc j) ≡ (f ⊕ g) j
+    eq j = refl
+
+{-
 ∑-C : (n : N) → ∑ (C n) 0 (suc n) ≡ 2 ^ n
 ∑-C 0 = refl
 ∑-C (suc n) =
@@ -94,5 +142,22 @@ _^_ a (suc n) = a * a ^ n
     g = λ x → C n (suc x)
     eq : (j : N) → (C (suc n)) (suc j) ≡ (f ⊕ g) j
     eq j = refl
+-}
 
+{-
+  begin
+    ∑ (f ⊕ g) i (suc (suc n))
+    ≡⟨ ∑-assoc (f ⊕ g) i (suc n) ⟩ ∑ (f ⊕ g) i (suc n) + (f ⊕ g) (i + suc n)
+    ≡⟨ cong (λ x → x + (f ⊕ g) (i + suc n)) (∑-par-shift f g i n) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + (f ⊕ g) (i + suc n)
+    ≡⟨⟩ f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + (f (i + suc n) + g (i + suc n))
+    ≡⟨ add-assoc (f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n)) (f (i + suc n)) (g (i + suc n)) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f (i + suc n) + g (i + suc n)
+    ≡⟨ cong (λ x → f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f x + g (i + suc n)) (plus-suc i n) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f (suc (i + n)) + g (i + suc n)
+    ≡⟨ cong (λ x → x + g (i + suc n)) (add-assoc (f i + ∑ (λ x → g x + f (suc x)) i n) (g (i + n)) (f (suc (i + n)))) ⟩
+      f i + ∑ (λ x → g x + f (suc x)) i n + (g (i + n) + f (suc (i + n))) + g (i + suc n)
+    ≡⟨ ? ⟩ f i + ∑ (λ x → g x + f (suc x)) i (suc n) + g (i + (suc n))
+  ∎
+-}
 
