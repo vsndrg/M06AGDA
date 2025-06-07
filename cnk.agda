@@ -109,14 +109,18 @@ _^_ a (suc n) = a * a ^ n
 
 ∑-C : (n : N) → ∑ (C n) 0 (suc n) ≡ 2 ^ n
 ∑-C 0 = refl
-∑-C (suc n) =
+∑-C 1 = refl
+∑-C (suc (suc m)) =
   begin
     ∑ (C (suc n)) 0 (suc (suc n))
     ≡⟨⟩ C (suc n) 0 + ∑ (C (suc n)) 1 (suc n)
     ≡⟨ cong (λ x → C (suc n) 0 + x) (∑-ind-shift (C (suc n)) (f ⊕ g) eq 0 (suc n)) ⟩ C (suc n) 0 + ∑ (f ⊕ g) 0 (suc n)
+    ≡⟨⟩ C n 0 + ∑ (f ⊕ g) 0 (suc n)
+    ≡⟨ cong (λ x → C n 0 + x) (∑-par-shift f g 0 n) ⟩ C n 0 + (f 0 + ∑ (f ⊕ g) 0 n + g n)
     ≡⟨ ? ⟩ 2 ^ suc n
   ∎
   where
+    n = suc m
     f g : N → N
     f = λ x → C n x
     g = λ x → C n (suc x)
@@ -142,22 +146,5 @@ _^_ a (suc n) = a * a ^ n
     g = λ x → C n (suc x)
     eq : (j : N) → (C (suc n)) (suc j) ≡ (f ⊕ g) j
     eq j = refl
--}
-
-{-
-  begin
-    ∑ (f ⊕ g) i (suc (suc n))
-    ≡⟨ ∑-assoc (f ⊕ g) i (suc n) ⟩ ∑ (f ⊕ g) i (suc n) + (f ⊕ g) (i + suc n)
-    ≡⟨ cong (λ x → x + (f ⊕ g) (i + suc n)) (∑-par-shift f g i n) ⟩
-      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + (f ⊕ g) (i + suc n)
-    ≡⟨⟩ f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + (f (i + suc n) + g (i + suc n))
-    ≡⟨ add-assoc (f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n)) (f (i + suc n)) (g (i + suc n)) ⟩
-      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f (i + suc n) + g (i + suc n)
-    ≡⟨ cong (λ x → f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f x + g (i + suc n)) (plus-suc i n) ⟩
-      f i + ∑ (λ x → g x + f (suc x)) i n + g (i + n) + f (suc (i + n)) + g (i + suc n)
-    ≡⟨ cong (λ x → x + g (i + suc n)) (add-assoc (f i + ∑ (λ x → g x + f (suc x)) i n) (g (i + n)) (f (suc (i + n)))) ⟩
-      f i + ∑ (λ x → g x + f (suc x)) i n + (g (i + n) + f (suc (i + n))) + g (i + suc n)
-    ≡⟨ ? ⟩ f i + ∑ (λ x → g x + f (suc x)) i (suc n) + g (i + (suc n))
-  ∎
 -}
 
