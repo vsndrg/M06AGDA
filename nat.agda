@@ -48,6 +48,32 @@ mul-zero : (a : N) → a * 0 ≡ 0
 mul-zero 0 = refl
 mul-zero (suc a) = mul-zero a
 
+mul-one : (a : N) → a * 1 ≡ a
+mul-one 0 = refl
+mul-one (suc a) =
+  begin
+    (suc a) * 1
+    ≡⟨⟩ 1 + a * 1
+    ≡⟨ cong (λ x → 1 + x) (mul-one a) ⟩ 1 + a
+    ≡⟨⟩ (suc a)
+  ∎
+
+distr-left : (a b c : N) → a * b + a * c ≡ a * (b + c)
+distr-left 0 b c = refl
+distr-left (suc a) b c =
+  begin
+    suc a * b + suc a * c
+    ≡⟨⟩ b + a * b + (c + a * c)
+    ≡⟨ add-assoc (b + a * b) c (a * c) ⟩ b + a * b + c + a * c
+    ≡⟨ cong (λ x → x + a * c) (sym (add-assoc b (a * b) c)) ⟩ b + (a * b + c) + a * c
+    ≡⟨ cong (λ x → b + x + a * c) (add-comm (a * b) c) ⟩ b + (c + a * b) + a * c
+    ≡⟨ cong (λ x → x + a * c) (add-assoc b c (a * b)) ⟩ b + c + a * b + a * c
+    ≡⟨ sym (add-assoc (b + c) (a * b) (a * c)) ⟩ b + c + (a * b + a * c)
+    ≡⟨ cong (λ x → b + c + x) (distr-left a b c) ⟩ b + c + a * (b + c)
+    ≡⟨⟩ (suc a) * (b + c)
+  ∎  
+
+
 {-
 mul-comm : (a b : N) → a * b ≡ b * a
 mul-comm 0 b = sym (mul-zero b)
